@@ -5,45 +5,71 @@
  *
  */
 
-import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
-import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
+import React, {useState, useCallback} from 'react';
 
-import { Card } from '@material-ui/core';
+import update from 'immutability-helper'
+import ContentCard from '../../components/card'
+import { DndProvider } from 'react-dnd'
+import Backend from 'react-dnd-html5-backend'
 
-const useStyles = makeStyles({
-  root: {
-    minWidth: 275,
-    width: 275,
-    margin: 5
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-  },
-  pos: {
-    marginBottom: 12,
-  },
-});
 export default function HomePage() {
-  const classes = useStyles();
-  return (
-<div>
-    <Card className={classes.root} raised={true}>
-    <b>Card 1</b>
-    </Card>
-        <Card className={classes.root} raised={true}>
-        <b>Card 2</b>
-        </Card>
-            <Card className={classes.root} raised={true}>
-            <b>Card 3</b>
-            </Card>
-            </div>
-  );
+  {
+    const [cards, setCards] = useState([
+      {
+        id: 1,
+        text: 'Card 1',
+      },
+      {
+        id: 2,
+        text: 'Card 2',
+      },
+      {
+        id: 3,
+        text: 'Card 3',
+      },
+      {
+        id: 4,
+        text: 'Card 4',
+      },
+      {
+        id: 5,
+        text:
+          'Card 5',
+      },
+    ])
+    const moveCard = useCallback(
+      (dragIndex, hoverIndex) => {
+        const dragCard = cards[dragIndex]
+        setCards(
+          update(cards, {
+            $splice: [
+              [dragIndex, 1],
+              [hoverIndex, 0, dragCard],
+            ],
+          }),
+        )
+      },
+      [cards],
+    )
+    const renderCard = (card, index) => {
+      return (
+        <ContentCard
+          key={card.id}
+          index={index}
+          id={card.id}
+          text={card.text}
+          moveCard={moveCard}
+        />
+      )
+    }
+    return (
+      <>
+      <DndProvider backend={Backend}>
+        <div>{cards.map((card, i) => renderCard(card, i))}</div>
+        </DndProvider>
+      </>
+    )
+  }
 }
+  
+
